@@ -164,7 +164,7 @@ addEventHandler("onClientResourceStart", root,
         guiSetAlpha(toppanel, 0)
         
         otherthings = guiCreateStaticImage(0.05, 0, 0.9, 1, "images/element.png", true, toppanel)
-        guiSetProperty(otherthings, "ImageColours", "tl:55AAAAAA tr:55AAAAAA bl:01AAAAAA br:01AAAAAA")
+        guiSetProperty(otherthings, "ImageColours", "tl:55AAAAAA tr:55AAAAAA bl:01AAAAAA br:01AAAAAA") 
         guiSetEnabled(otherthings, false)
         guiMoveToBack(otherthings)
         
