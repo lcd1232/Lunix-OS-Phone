@@ -23,7 +23,7 @@ function createPhoneWindow(colortop, colbottom, enablestatusbar, statusbartype)
     --desktopNotbarType(statusbartype)
     
     guiBringToFront(getStatusbar())
-    guiBringToFront(getNotbar())
+    guiBringToFront(getNotbar()) 
     guiBringToFront(getNotbarMover())
     
     guiSetVisible(phoneWindow[windowCount], false)
