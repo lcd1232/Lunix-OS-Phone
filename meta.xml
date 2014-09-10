@@ -1,0 +1,63 @@
+ <meta>
+    <info author="TrezeLurese" name="Lunix OS Phone" version="alpha" type="script"/>
+    
+    <script src="details.lua" type="client"/>
+    <script src="elements.lua" type="client"/>
+    
+    <file src="images/element.png"/>
+    <file src="images/phone.png"/>
+    <file src="images/phonew.png"/>
+    <file src="images/top.png"/>
+    <file src="images/switcher.png"/>
+    <file src="images/switch.png"/>
+    <file src="images/clear.png"/>
+    <file src="images/battery.png"/>
+    <file src="images/wifi.png"/>
+    <file src="images/thr.png"/>
+    
+    <file src="fonts/bold.ttf"/>
+    <file src="fonts/light.ttf"/>
+    <file src="fonts/light-italic.ttf"/>
+    <file src="fonts/medium.ttf"/>
+    <file src="fonts/medium-italic.ttf"/>
+    <file src="fonts/regular.ttf"/>
+    <file src="fonts/thin.ttf"/>
+    <file src="fonts/thin-italic.ttf"/>
+    
+    <export function="closeTopbar" type="client"/>
+    <export function="openTopbar" type="client"/>
+    <export function="ocTopbar" type="client"/>
+    <export function="desktopNotbarType" type="client"/>
+    <export function="getNotbar" type="client"/>
+    <export function="getNotbarMover" type="client"/>
+    <export function="getStatusbar" type="client"/>
+    <export function="getNotificationPane" type="client"/>
+    <export function="getNotificationZone" type="client"/>
+    <export function="getDesktop" type="client"/>
+    <export function="getPhoneSize" type="client"/>
+    <export function="getPhonePosition" type="client"/>
+    <export function="getScreenPosition" type="client"/>
+    <export function="getRealScreenPosition" type="client"/>
+    <export function="createPhoneWindow" type="client"/>
+    <export function="createSwitcher" type="client"/>
+    <export function="addNotification" type="client"/>
+    <export function="moveBackNotification" type="client"/>
+    <export function="destroyNotification" type="client"/>
+    <export function="getNotification" type="client"/>
+    <export function="getNotificationClear" type="client"/>
+    <export function="getNotificationCount" type="client"/>
+    <export function="getNotificationTable" type="client"/>
+    <export function="getNotificationElementWhereCanAddElement" type="client"/>
+    <export function="getNotificationMenuSize" type="client"/>
+    <export function="createPhoneInfo" type="client"/>
+    <export function="getPhone" type="client"/>
+    <export function="createAcceptPanel" type="client"/>
+    <export function="setVisibleAcceptPanel" type="client"/>
+    <export function="getSwitcherEnabled" type="client"/>
+    <export function="getAcceptPanel" type="client"/>
+    <export function="hideAllWindows" type="client"/>
+    <export function="showWindow" type="client"/>
+    <export function="hideWindow" type="client"/>
+    <export function="doAnimated" type="client"/>
+        
+</meta>
