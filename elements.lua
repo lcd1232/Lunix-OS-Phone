@@ -45,6 +45,7 @@ function showWindow(id)
     doAnimated(phoneWindow[id], true)
     desktopNotbarType(phoneWindowStatusbarType[id])
     guiSetVisible(getStatusbar(), phoneWindowStatusbarBy[id])
+    closeTopbar()
 end
 
 function hideWindow(id)
@@ -52,6 +53,7 @@ function hideWindow(id)
     doAnimated(phoneWindow[id], false)
     desktopNotbarType("desktop")
     guiSetVisible(getStatusbar(), true)
+    closeTopbar()
 end
 
 local elementTimer={}

@@ -164,13 +164,12 @@ addEventHandler("onClientResourceStart", root,
         guiSetAlpha(toppanel, 0)
         
         otherthings = guiCreateStaticImage(0.05, 0, 0.9, 1, "images/element.png", true, toppanel)
-        guiSetProperty(otherthings, "ImageColours", "tl:44AAAAAA tr:44AAAAAA bl:00000000 br:00000000")
+        guiSetProperty(otherthings, "ImageColours", "tl:55AAAAAA tr:55AAAAAA bl:01AAAAAA br:01AAAAAA")
         guiSetEnabled(otherthings, false)
         guiMoveToBack(otherthings)
         
         notbarinfo = guiCreateStaticImage(0, 0, phonew, 40, "images/element.png", false, toppanel)
         guiSetProperty(notbarinfo, "ImageColours", "tl:FF555555 tr:FF555555 bl:AA333333 br:AA333333")
-        --guiSetEnabled(notbarinfo, false)
         
         timetopbar = guiCreateLabel(0, 0, phonew, 20, "12:30", false, statusbar)
         guiLabelSetHorizontalAlign(timetopbar, "center")
