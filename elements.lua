@@ -620,6 +620,6 @@ end
 1) onClientClickFirstAccept; onClientClickSecondAccept; onClientClickThirdAccept; onClientClickFourAccept
 Returns ID of accepted button in accept-panel
 
-2) onClientDisableSwitcher; onClientEnableSwitcher
+2) onClientDisableSwitcher; onClientEnableSwitcher 
 Returns ID of switcher, what changed
 ]]
