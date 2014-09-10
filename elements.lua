@@ -9,8 +9,6 @@ function createPhoneWindow(colortop, colbottom, enablestatusbar, statusbartype)
     if not colortop or type(colortop) == "userdata" then colortop = tocolor(80, 80, 80, 255) end 
     if not colbottom or type(colbottom) == "userdata" then colbottom = tocolor(30, 30, 30, 255) end 
     
-    outputDebugString(tostring(colortop).." "..tostring(colbottom))
-    
     local w, h = getPhoneSize()
     windowCount = windowCount+1
     phoneWindow[windowCount] = guiCreateStaticImage(0, enablestatusbar == false and 0 or 20, w, enablestatusbar == false and h or h-20, "images/element.png", false, getDesktop())
