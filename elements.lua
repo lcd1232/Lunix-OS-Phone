@@ -473,6 +473,7 @@ local IDentifyPane = 0
 local disableScreen={}
 local acceptPanel={}
 local textPanel={}
+local editPanel={}
 local button1={}
 local but1txt={}
 local button2={}
@@ -482,18 +483,21 @@ local but3txt={}
 local button4={}
 local but4txt={}
 
+local panelTimer={}
+
 function setVisibleAcceptPanel(id, bool)
     if not isElement(disableScreen[id]) then return 1 end
+    if isTimer(panelTimer[id]) then return 1 end 
     
     if bool ~= true and bool ~= false then bool = true end
     
     if bool == true then guiSetVisible(disableScreen[id], true) end
     local CountAlpha = 0
     
-    setTimer(function()
+    panelTimer[id] = setTimer(function()
         CountAlpha = CountAlpha+1
-        if bool == true then guiSetAlpha(disableScreen[IDentifyPane], guiGetAlpha(disableScreen[IDentifyPane])+0.1)
-        else guiSetAlpha(disableScreen[IDentifyPane], guiGetAlpha(disableScreen[IDentifyPane])-0.1) end
+        if bool == true then guiSetAlpha(disableScreen[id], guiGetAlpha(disableScreen[id])+0.1)
+        else guiSetAlpha(disableScreen[id], guiGetAlpha(disableScreen[id])-0.1) end
         if CountAlpha == 11 then guiSetVisible(disableScreen[id], bool) end
     end, 70, 11)
     
@@ -578,14 +582,112 @@ function createAcceptPanel(text, but1, but2, but3, but4)
         guiSetAlpha(disableScreen[IDentifyPane], guiGetAlpha(disableScreen[IDentifyPane])+0.1)
     end, 70, 10)
     
-    return IDentifyPane
+    return acceptPanel[IDentifyPane], IDentifyPane
 end
+
+function createEditAcceptPanel(text, but1, but2, but3, but4, pass)
+    local w, h = getPhoneSize()
+    --local x, y = getScreenPosition()
+    if not but1 then but1 = "OK" end
+    if not pass or (pass ~= true and pass ~= false) then pass = false end
+    IDentifyPane = IDentifyPane+1 
+    
+    text = text.."\n\n\n"
+    text = text:gsub("\n", "\n   ")
+    local size = 20*(select(2, text:gsub('\n', '\n'))+1)+30
+    text = "   "..text
+    
+    disableScreen[IDentifyPane] = guiCreateStaticImage(0, 0, w, h, "images/element.png", false, getDesktop())
+    guiSetProperty(disableScreen[IDentifyPane], "ImageColours", "tl:AA444444 tr:AA444444 bl:AA444444 br:AA444444")
+    guiBringToFront(disableScreen[IDentifyPane])
+    
+    acceptPanel[IDentifyPane] = guiCreateStaticImage(0, h-size-30, w, size+30, "images/element.png", false, disableScreen[IDentifyPane])
+    guiSetProperty(acceptPanel[IDentifyPane], "ImageColours", "tl:00000000 tr:00000000 bl:FF000000 br:FF000000")
+    
+    textPanel[IDentifyPane] = guiCreateLabel(0, 0, w, size, tostring(text), false, acceptPanel[IDentifyPane])
+    guiLabelSetVerticalAlign(textPanel[IDentifyPane], "center")
+    guiSetFont(textPanel[IDentifyPane], guiCreateFont("fonts/regular.ttf", 10))
+    
+    editPanel[IDentifyPane] = guiCreateEdit(20, size-50, w-40, 25, "", false, textPanel[IDentifyPane])
+    guiSetAlpha(editPanel[IDentifyPane], 0.5)
+    if pass then guiEditSetMasked(editPanel[IDentifyPane], true) end
+    
+    edit(IDentifyPane)
+    
+    local numer = w
+    if but2 and not but3 and not but4 then numer = numer/2 end
+    if but2 and but3 and not but4 then numer = numer/3 end
+    if but2 and but3 and but4 then numer = numer/4 end
+    
+    button1[IDentifyPane] = guiCreateStaticImage(0, size, numer, 30, "images/element.png", false, acceptPanel[IDentifyPane])
+    guiSetProperty(button1[IDentifyPane], "ImageColours", "tl:22222222 tr:22222222 bl:22222222 br:22222222")
+    
+    but1txt[IDentifyPane] = guiCreateLabel(0, 0, numer, 30, tostring(but1), false, button1[IDentifyPane])
+    guiLabelSetVerticalAlign(but1txt[IDentifyPane], "center")
+    guiLabelSetHorizontalAlign(but1txt[IDentifyPane], "center")
+    guiSetFont(but1txt[IDentifyPane], guiCreateFont("fonts/bold.ttf", 10))
+    
+    button(IDentifyPane, true)
+    
+    if but2 then
+        button2[IDentifyPane] = guiCreateStaticImage(numer, size, numer, 30, "images/element.png", false, acceptPanel[IDentifyPane])
+        guiSetProperty(button2[IDentifyPane], "ImageColours", "tl:22222222 tr:22222222 bl:22222222 br:22222222")
+        
+        but2txt[IDentifyPane] = guiCreateLabel(0, 0, numer, 30, tostring(but2), false, button2[IDentifyPane])
+        guiLabelSetVerticalAlign(but2txt[IDentifyPane], "center")
+        guiLabelSetHorizontalAlign(but2txt[IDentifyPane], "center")
+        guiSetFont(but2txt[IDentifyPane], guiCreateFont("fonts/bold.ttf", 10))
+        
+        buttonz(IDentifyPane, 2, true)
+    end
+    
+    if but3 then
+        button3[IDentifyPane] = guiCreateStaticImage(numer+numer, size, numer, 30, "images/element.png", false, acceptPanel[IDentifyPane])
+        guiSetProperty(button3[IDentifyPane], "ImageColours", "tl:22222222 tr:22222222 bl:22222222 br:22222222")
+        
+        but3txt[IDentifyPane] = guiCreateLabel(0, 0, numer, 30, tostring(but3), false, button3[IDentifyPane])
+        guiLabelSetVerticalAlign(but3txt[IDentifyPane], "center")
+        guiLabelSetHorizontalAlign(but3txt[IDentifyPane], "center")
+        guiSetFont(but3txt[IDentifyPane], guiCreateFont("fonts/bold.ttf", 10))
+    
+        buttonz(IDentifyPane, 3, true)
+    end
+    
+    if but4 then
+        button4[IDentifyPane] = guiCreateStaticImage(numer+numer+numer, size, numer, 30, "images/element.png", false, acceptPanel[IDentifyPane])
+        guiSetProperty(button4[IDentifyPane], "ImageColours", "tl:22222222 tr:22222222 bl:22222222 br:22222222")
+        
+        but4txt[IDentifyPane] = guiCreateLabel(0, 0, numer, 30, tostring(but4), false, button4[IDentifyPane])
+        guiLabelSetVerticalAlign(but4txt[IDentifyPane], "center")
+        guiLabelSetHorizontalAlign(but4txt[IDentifyPane], "center")
+        guiSetFont(but4txt[IDentifyPane], guiCreateFont("fonts/bold.ttf", 10))
+    
+        buttonz(IDentifyPane, 4, true)
+    end
+    
+    guiSetAlpha(disableScreen[IDentifyPane], 0)
+    
+    setTimer(function()
+        guiSetAlpha(disableScreen[IDentifyPane], guiGetAlpha(disableScreen[IDentifyPane])+0.1)
+    end, 70, 10)
+    
+    return acceptPanel[IDentifyPane], IDentifyPane
+end
+
 function getAcceptPanel(id)
     if not isElement(disableScreen[id]) then return 1 end
     return acceptPanel[id] 
 end
 
-function button(id)
+function edit(id)
+    addEventHandler("onClientGUIAccepted", editPanel[id], function()
+        if source ~= editPanel[id] then return false end
+        setVisibleAcceptPanel(id, false) 
+        triggerEvent("onClientClickFirstAccept", localPlayer, id, bool == true and guiGetText(editPanel[id]) or false)
+    end)
+end
+
+function button(id, bool)
     addEventHandler("onClientGUIClick", textPanel[id], function()
         setVisibleAcceptPanel(id, true)
     end, false)
@@ -596,26 +698,25 @@ function button(id)
     
     addEventHandler("onClientGUIClick", but1txt[id], function()
         setVisibleAcceptPanel(id, false) 
-        triggerEvent("onClientClickFirstAccept", localPlayer, id)
+        triggerEvent("onClientClickFirstAccept", localPlayer, id, bool == true and guiGetText(editPanel[id]) or false)
     end, false)
     
     addEventHandler("onClientMouseEnter", but1txt[id], function() if source == but1txt[id] then guiSetAlpha(but1txt[id], 0.5) end end)
     addEventHandler("onClientMouseLeave", but1txt[id], function() if source == but1txt[id] then guiSetAlpha(but1txt[id], 1  ) end end)
 end
 
-function buttonz(id, num)
+function buttonz(id, num, bool)
     local ele, str = but2txt, "onClientClickSecondAccept"
     if num == 2 then ele = but2txt str = "onClientClickSecondAccept" end
     if num == 3 then ele = but3txt str = "onClientClickThirdAccept" end
     if num == 4 then ele = but4txt str = "onClientClickFourAccept" end
     addEventHandler("onClientGUIClick", ele[id], function()
         setVisibleAcceptPanel(id, false) 
-        triggerEvent(str, localPlayer, id)
+        triggerEvent(str, localPlayer, id, bool == true and guiGetText(editPanel[id]) or false)
     end, false)
     addEventHandler("onClientMouseEnter", ele[id], function() if source == ele[id] then guiSetAlpha(ele[id], 0.5) end end)
     addEventHandler("onClientMouseLeave", ele[id], function() if source == ele[id] then guiSetAlpha(ele[id], 1  ) end end)
 end
-
 --[[Triggers from this file:
 1) onClientClickFirstAccept; onClientClickSecondAccept; onClientClickThirdAccept; onClientClickFourAccept
 Returns ID of accepted button in accept-panel

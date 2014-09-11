@@ -3,6 +3,7 @@
     
     <script src="details.lua" type="client"/>
     <script src="elements.lua" type="client"/>
+    <script src="lockscreen.lua" type="client"/>
     
     <file src="images/element.png"/>
     <file src="images/phone.png"/>
@@ -52,6 +53,7 @@
     <export function="createPhoneInfo" type="client"/>
     <export function="getPhone" type="client"/>
     <export function="createAcceptPanel" type="client"/>
+    <export function="createEditAcceptPanel" type="client"/>
     <export function="setVisibleAcceptPanel" type="client"/>
     <export function="getSwitcherEnabled" type="client"/>
     <export function="getAcceptPanel" type="client"/>
@@ -59,5 +61,13 @@
     <export function="showWindow" type="client"/>
     <export function="hideWindow" type="client"/>
     <export function="doAnimated" type="client"/>
+    <export function="colorChange" type="client"/>
+    <export function="startPhone" type="client"/>
+    <export function="stopPhone" type="client"/>
+    <export function="ocPhone" type="client"/>
+    <export function="setEnabledNotificationPanel" type="client"/>
+    <export function="showLockScreen" type="client"/>
+    <export function="closeLockScreen" type="client"/>
+    <export function="addLockScreenElement" type="client"/>
         
 </meta>

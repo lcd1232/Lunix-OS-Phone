@@ -1,5 +1,5 @@
 local width, height = guiGetScreenSize()
-local phonex, phoney = width-340, height-540
+local phonex, phoney = width-340, height-542
 local phonew, phoneh = 275, 420
 local screenpx, screenpy = 13, 38
     
@@ -148,9 +148,16 @@ addEventHandler("onClientResourceStart", root,
         
         --local font = guiCreateFont("fonts/bold.ttf", 10)
         
-        phone = guiCreateStaticImage(phonex, phoney, 300, 500, "images/phonew.png", false)
+        phone = guiCreateStaticImage(phonex, phoney, 300, 502, "images/phone.png", false)
+        
+        startbutton = guiCreateStaticImage(244, 3, 35, 5, "images/element.png", false, phone)
+        guiSetAlpha(startbutton, 0)
+        
         desktop = guiCreateStaticImage(screenpx, screenpy, phonew, phoneh, "images/element.png", false, phone)
         guiSetProperty(desktop, "ImageColours", "tl:AAFF0000 tr:AA00FF00 bl:AA6600FF br:AA0000FF")
+        
+        
+        
         
         statusbar = guiCreateStaticImage(0, 0, phonew, 20, "images/top.png", false, desktop)
         guiSetProperty(statusbar, "ImageColours", "tl:FF222222 tr:FF222222 bl:FF222222 br:FF222222")
@@ -228,9 +235,11 @@ addEventHandler("onClientResourceStart", root,
                     destroyNotification(getNotificationTable()[i]) 
                 end, 100*i, 1)
             end
-            
-            
-            
+        end, false)
+        
+        addEventHandler("onClientGUIClick", startbutton, function()
+            if source ~= startbutton then return 1 end
+            ocPhone()
         end, false)
         
         addEventHandler("onClientGUIMouseDown", root, function(Button, _, ScrollY)
@@ -335,6 +344,41 @@ addEventHandler("onClientRender", root, function()
     local x, y, z = getElementPosition(localPlayer)
     guiSetText(location, getZoneName(x, y, z))
 end)
+
+function setEnabledNotificationPanel(bool)
+    if not bool or (bool ~= true and bool ~= false) then bool = not guiGetEnabled(topmover) end
+    guiSetEnabled(topmover, bool)
+    closeTopbar()
+end
+
+local startExitTimer
+function startPhone()
+    if guiGetAlpha(desktop) == 1 then return 1 end
+    if isTimer(startExitTimer) then return false end
+    
+    guiSetVisible(desktop, true)
+    showLockScreen()
+    
+    startExitTimer = setTimer(function()
+        guiSetAlpha(desktop, guiGetAlpha(desktop)+0.1)
+    end, 50, 10)
+end
+function stopPhone()
+    if guiGetAlpha(desktop) == 0 then return 1 end
+    if isTimer(startExitTimer) then return false end
+    
+    local id = 0
+    startExitTimer = setTimer(function()
+        id = id+1
+        guiSetAlpha(desktop, guiGetAlpha(desktop)-0.1)
+        if id >= 11 then guiSetVisible(desktop, false) end
+    end, 50, 11)
+end
+function ocPhone()
+    if guiGetAlpha(desktop) == 0 then startPhone()
+    else stopPhone() end
+end
+    
     
 function ocTopbar()
     local _, ScrollPosition = guiGetPosition(topmover, false)
@@ -401,6 +445,61 @@ end
 function getNotificationMenuSize()
     local _, h = guiGetSize(changernots, false)
     return h
+end
+
+local colorChanger
+function colorChange(element, fromred, fromgreen, fromblue, tored, togreen, toblue, time)
+    if not isElement(element) then return false end
+    if isTimer(colorChanger) then return false end
+    
+    if fromred < 0 or fromred > 255 or not tonumber(fromred) then fromred = 255 end
+    if fromgreen < 0 or fromgreen > 255 or not tonumber(fromgreen) then fromgreen = 255 end
+    if fromblue < 0 or fromblue > 255 or not tonumber(fromblue) then fromblue = 255 end
+    if tored < 0 or tored > 255 or not tonumber(tored) then tored = 255 end
+    if togreen < 0 or togreen > 255 or not tonumber(togreen) then togreen = 255 end
+    if toblue < 0 or toblue > 255 or not tonumber(toblue) then toblue = 255 end
+    if time < 50 or time > 100 or not tonumber(time) then time = 50 end
+    
+    local colores = tonumber(string.format("%i", math.sqrt(time)))
+    
+    local redpog, greenpog, bluepog
+    redpog = math.fmod(math.abs(fromred-tored), colores) 
+    greenpog = math.fmod(math.abs(fromgreen-togreen), colores) 
+    bluepog = math.fmod(math.abs(fromblue-toblue), colores) 
+    
+    local numeric = 0
+    colorChanger = setTimer(function()
+        if numeric == 0 then
+            numeric = 1
+            if fromred > tored then fromred = fromred-redpog end
+            if fromgreen > togreen then fromgreen = fromgreen-greenpog end
+            if fromblue > toblue then fromblue = fromblue-bluepog end
+            
+            if fromred < tored then fromred = fromred+redpog end
+            if fromgreen < togreen then fromgreen = fromgreen+greenpog end
+            if fromblue < toblue then fromblue = fromblue+bluepog end
+        else
+            if fromred > tored then fromred = fromred-colores end
+            if fromgreen > togreen then fromgreen = fromgreen-colores end
+            if fromblue > toblue then fromblue = fromblue-colores end
+            
+            if fromred < tored then fromred = fromred+colores end
+            if fromgreen < togreen then fromgreen = fromgreen+colores end
+            if fromblue < toblue then fromblue = fromblue+colores end
+        end
+        
+        if getElementType(element) == "gui-staticimage" then 
+            local st = string.format("tl:FF%.2x%.2x%.2x tr:FF%.2x%.2x%.2x bl:FF%.2x%.2x%.2x br:FF%.2x%.2x%.2x", fromred, fromgreen, fromblue, fromred, fromgreen, fromblue, fromred, fromgreen, fromblue, fromred, fromgreen, fromblue)
+            guiSetProperty(element, "ImageColours", st)
+        elseif getElementType(element) == "gui-label" then
+            guiLabelSetColor(element, fromred, fromgreen, fromblue)
+        else
+            local st = string.format("tl:FF%.2x%.2x%.2x tr:FF%.2x%.2x%.2x bl:FF%.2x%.2x%.2x br:FF%.2x%.2x%.2x", fromred, fromgreen, fromblue, fromred, fromgreen, fromblue, fromred, fromgreen, fromblue, fromred, fromgreen, fromblue)
+            guiSetProperty(element, "NormalTextColour", st)
+        end
+        if fromred == tored and fromgreen == togreen and fromblue == toblue then killTimer(colorChanger) end
+    end, time, 0)
+
 end
 
 addEvent("setSize", true)
