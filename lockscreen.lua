@@ -42,6 +42,7 @@ addEventHandler("onClientResourceStart", root, function(res)
         local scrollPositionX = guiGetPosition(lockscreen, false)
         newPositions = ScrollX-scrollPositionX
         scrollCursor = ScrollX
+        guiBringToFront(lockscreen)
     end)
             
     addEventHandler("onClientGUIMouseUp", root, function()
@@ -57,6 +58,7 @@ addEventHandler("onClientResourceStart", root, function(res)
         else closeLockScreen() end
         
         clickers = false
+        guiBringToFront(lockscreen)
     end)
     
     addEventHandler("onClientCursorMove", root, function(_, _, cursorPosX, cursorPosY)
@@ -80,6 +82,8 @@ addEventHandler("onClientResourceStart", root, function(res)
             findPosition = (phoneX+screenX+notW)-15
             setCursorPosition((phoneX+screenX+notW)-15, cursorPosY)
         end
+        
+        guiBringToFront(lockscreen)
         
         if cursorPosY < phoneY+screenY+notY+40 then setCursorPosition(cursorPosX, phoneY+screenY+notY+40) end
         if cursorPosY > (phoneY+screenY+notY+40+notH)-15 then setCursorPosition(cursorPosX, (phoneY+screenY+notY+40+notH)-15) end
@@ -120,6 +124,7 @@ function showLockScreen()
             end
         end
     end, 50, timerNumber)
+    guiBringToFront(lockscreen)
 end
 
 function closeLockScreen()
