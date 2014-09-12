@@ -160,7 +160,13 @@ addEventHandler("onClientRender", root,
             if newPosX >= getOpeningMod[2]-10 then guiSetAlpha(lockscreen, 0) end
             
         end
+<<<<<<< HEAD
     end)
+=======
+    end, 50, timerNumber)
+    guiBringToFront(lockscreen)
+end
+>>>>>>> f16b9bd255bdc3c9569cc35c97970dd2aa0d5fe1
 
 local moveTimerOpen = false
 function closeLockScreen()
