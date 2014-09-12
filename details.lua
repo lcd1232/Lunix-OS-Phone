@@ -4,73 +4,63 @@ local phonew, phoneh = 275, 420
 local screenpx, screenpy = 13, 38
     
 local openTimer, closeTimer
+
+local renderin = false
+local getModClose = 0
 function closeTopbar()
-    if isTimer(closeTimer) then return false end --If timer in process, then return false
+    if renderin then return false end --If timer in process, then return false
     
     guiBringToFront(topmover)
     guiBringToFront(toppanel)
     
-    local posX, posY = guiGetPosition(topmover, false) --Find positions
+    local _, posY = guiGetPosition(topmover, false) --Find positions
     posY = posY + 42 --Remove 21pix for move zone
     
-    local getMod = math.fmod(posY, 42) --Add to moving
-    local timerNumber =  math.abs( (posY-getMod) /42 )+1 --Timer count
+    getModClose = math.fmod(posY, 18) --Add to moving
     
-    local counts = 1
-    closeTimer = setTimer(function()
-        local sizeW, sizeH = guiGetSize(toppanel, false) --Find size of notbar
-        if sizeH <= 0 then 
-            guiSetPosition(topmover, 0, 0, false) --Move topbar mover to start pos
-            guiSetSize(toppanel, sizeW, 0, false) --Resize notbar to start size
-            killTimer(closeTimer) --Stop moving when position setted to start pos
-        end 
-        
-        if sizeH >= 0 and sizeH < 7 then
-            guiSetAlpha(topmover, 0)
-            guiSetAlpha(toppanel, 0)
-        elseif sizeH >= 7 and sizeH < 14 then
-            guiSetAlpha(topmover, 0.1)
-            guiSetAlpha(toppanel, 0.1)
-        elseif sizeH >= 14 and sizeH < 21 then
-            guiSetAlpha(topmover, 0.3)
-            guiSetAlpha(toppanel, 0.3)
-        elseif sizeH >= 21 and sizeH < 28 then
-            guiSetAlpha(topmover, 0.4)
-            guiSetAlpha(toppanel, 0.4)
-        elseif sizeH >= 28 and sizeH < 35 then
-            guiSetAlpha(topmover, 0.5)
-            guiSetAlpha(toppanel, 0.5)
-        elseif sizeH >= 35 and sizeH < 42 then
-            guiSetAlpha(topmover, 0.6)
-            guiSetAlpha(toppanel, 0.6)
-        elseif sizeH >= 42 and sizeH < 49 then
-            guiSetAlpha(topmover, 0.7)
-            guiSetAlpha(toppanel, 0.7)
-        elseif sizeH >= 49 and sizeH < 56 then
-            guiSetAlpha(topmover, 0.8)
-            guiSetAlpha(toppanel, 0.8)
-        elseif sizeH >= 56 and sizeH < 63 then
-            guiSetAlpha(topmover, 0.9)
-            guiSetAlpha(toppanel, 0.9)
-        elseif sizeH >= 63 then
-            guiSetAlpha(topmover, 1)
-            guiSetAlpha(toppanel, 1)
-        end
-        
-        local newPosX, newPosY = guiGetPosition(topmover, false)
-        if counts == 1 then
-            guiSetPosition(topmover, newPosX, newPosY-getMod, false) --Move topbar mover down on mod position
-            guiSetSize(toppanel, sizeW, sizeH-getMod, false) --Resize notbar down on mod position
-        else
-            guiSetPosition(topmover, newPosX, newPosY > 0 and newPosY-42 or 0, false) --Set new positions to topbar mover
-            guiSetSize(toppanel, sizeW, sizeH > 0 and sizeH-42 or 0, false) -- Resize notbar
-        end 
-        counts = counts + 1
-    end, 50, timerNumber)
+    renderin = true
 end
 
+local countsClose = 1
+addEventHandler("onClientRender", root, function()
+    if not renderin then return false end
+    local sizeW, sizeH = guiGetSize(toppanel, false) --Find size of notbar
+        
+    if sizeH == 0 then
+        guiSetAlpha(topmover, 0)
+        guiSetAlpha(toppanel, 0)
+    elseif sizeH > 0 then
+        guiSetAlpha(topmover, 1)
+        guiSetAlpha(toppanel, 1)
+    end
+    
+    guiSetAlpha(statusbar, guiGetAlpha(statusbar)+0.1)
+        
+    if sizeH <= 0 then 
+        guiSetPosition(topmover, 0, 0, false) --Move topbar mover to start pos
+        guiSetSize(toppanel, sizeW, 0, false) --Resize notbar to start size
+        renderin = false
+        guiSetAlpha(statusbar, 1)
+        cancelEvent() --Stop moving when position setted to start pos
+        return 1
+    end 
+        
+    local newPosX, newPosY = guiGetPosition(topmover, false)
+    if countsClose == 1 then
+        guiSetPosition(topmover, newPosX, newPosY-getModClose, false) --Move topbar mover down on mod position
+        guiSetSize(toppanel, sizeW, sizeH-getModClose, false) --Resize notbar down on mod position
+    else
+        guiSetPosition(topmover, newPosX, newPosY > 0 and newPosY-18 or 0, false) --Set new positions to topbar mover
+        guiSetSize(toppanel, sizeW, sizeH > 0 and sizeH-18 or 0, false) -- Resize notbar
+    end 
+    countsClose = countsClose + 1
+end)
+
+local opening = false
+local getModOpen = 0
 function openTopbar()
-    if isTimer(openTimer) then return false end --If timer in process, then return false
+    if opening then return false end --If timer in process, then return false
+    opening = true
     
     guiBringToFront(topmover)
     guiBringToFront(toppanel)
@@ -79,63 +69,45 @@ function openTopbar()
     posY = posY + 42 --Remove 21pix for move zone
     if posY ~= phoneh then posY = posY-phoneh end  --If Y not Phone Height, then set Y little 
     
-    local getMod = math.fmod(posY, 42) --Add to moving
-    local timerNumber =  math.abs( (posY-getMod) /42 )+1 --Timer count
-    
-    local counts = 1
-    openTimer = setTimer(function()
-        local sizeW, sizeH = guiGetSize(toppanel, false) --Find size of notbar
-        if sizeH >= phoneh - 21 then 
-            guiSetPosition(topmover, 0, phoneh-21, false) --Move topbar mover to finish pos
-            guiSetSize(toppanel, sizeW, phoneh-21, false) --Resize notbar to finish size
-            killTimer(openTimer) --Stop moving when position setted to last
-        end 
-        
-        if sizeH >= 0 and sizeH < 7 then
-            guiSetAlpha(topmover, 0)
-            guiSetAlpha(toppanel, 0)
-        elseif sizeH >= 7 and sizeH < 14 then
-            guiSetAlpha(topmover, 0.1)
-            guiSetAlpha(toppanel, 0.1)
-        elseif sizeH >= 14 and sizeH < 21 then
-            guiSetAlpha(topmover, 0.3)
-            guiSetAlpha(toppanel, 0.3)
-        elseif sizeH >= 21 and sizeH < 28 then
-            guiSetAlpha(topmover, 0.4)
-            guiSetAlpha(toppanel, 0.4)
-        elseif sizeH >= 28 and sizeH < 35 then
-            guiSetAlpha(topmover, 0.5)
-            guiSetAlpha(toppanel, 0.5)
-        elseif sizeH >= 35 and sizeH < 42 then
-            guiSetAlpha(topmover, 0.6)
-            guiSetAlpha(toppanel, 0.6)
-        elseif sizeH >= 42 and sizeH < 49 then
-            guiSetAlpha(topmover, 0.7)
-            guiSetAlpha(toppanel, 0.7)
-        elseif sizeH >= 49 and sizeH < 56 then
-            guiSetAlpha(topmover, 0.8)
-            guiSetAlpha(toppanel, 0.8)
-        elseif sizeH >= 56 and sizeH < 63 then
-            guiSetAlpha(topmover, 0.9)
-            guiSetAlpha(toppanel, 0.9)
-        elseif sizeH >= 63 then
-            guiSetAlpha(topmover, 1)
-            guiSetAlpha(toppanel, 1)
-        end
-        
-        local newPosX, newPosY = guiGetPosition(topmover, false) --Get new positions of mover
-        
-        if counts == 1 then 
-            counts = 0
-            guiSetPosition(topmover, newPosX, newPosY-getMod+21, false) --Move topbar mover down on mod position
-            guiSetSize(toppanel, sizeW, sizeH-getMod+21, false) --Resize notbar down on mod position
-        else
-            guiSetPosition(topmover, newPosX, newPosY > phoneh-21 and newPosY-42 or newPosY+42, false) --Set new positions to topbar mover
-            guiSetSize(toppanel, sizeW, sizeH > phoneh-21 and sizeH-42 or sizeH+42, false) -- Resize notbar
-        end
-    end, 50, timerNumber)
-    
+    local getModOpen = math.fmod(posY, 18) --Add to moving
 end
+local countsOpen = 1
+addEventHandler("onClientRender", root, function()
+    if not opening then return false end
+        
+    local sizeW, sizeH = guiGetSize(toppanel, false) --Find size of notbar
+        
+    if sizeH == 0 then
+        guiSetAlpha(topmover, 0)
+        guiSetAlpha(toppanel, 0)
+    elseif sizeH > 0 then
+        guiSetAlpha(topmover, 1)
+        guiSetAlpha(toppanel, 1)
+    end
+    
+    guiSetAlpha(statusbar, guiGetAlpha(statusbar)-0.1)
+        
+    if sizeH >= phoneh - 21 then 
+        guiSetPosition(topmover, 0, phoneh-21, false)  --Move topbar mover to finish pos
+        guiSetSize(toppanel, sizeW, phoneh-21, false)  --Resize notbar to finish size
+        
+        opening = false
+        guiSetAlpha(statusbar, 0)
+        cancelEvent() --Stop moving when position setted to start pos
+        return 1
+    end 
+        
+    local newPosX, newPosY = guiGetPosition(topmover, false) --Get new positions of mover
+        
+    if countsOpen == 1 then 
+        countsOpen = 0
+        guiSetPosition(topmover, newPosX, newPosY-getModOpen, false)  --Move topbar mover down on mod position
+        guiSetSize(toppanel, sizeW, sizeH-getModOpen, false)  --Resize notbar down on mod position
+    else
+        guiSetPosition(topmover, newPosX, newPosY > phoneh-21 and newPosY-18 or newPosY+18, false)  --Set new positions to topbar mover
+        guiSetSize(toppanel, sizeW, sizeH > phoneh-21 and sizeH-18 or sizeH+18, false)  -- Resize notbar
+    end
+end)
 
 local clicked = false
 local setNewPosition = 0
@@ -148,56 +120,56 @@ addEventHandler("onClientResourceStart", root,
         
         --local font = guiCreateFont("fonts/bold.ttf", 10)
         
-        phone = guiCreateStaticImage(phonex, phoney, 300, 502, "images/phone.png", false)
+        phone = guiCreateStaticImage(phonex, phoney, 300, 502, "images/phonew.png", false)
         
         startbutton = guiCreateStaticImage(244, 3, 35, 5, "images/element.png", false, phone)
         guiSetAlpha(startbutton, 0)
         
-        desktop = guiCreateStaticImage(screenpx, screenpy, phonew, phoneh, "images/element.png", false, phone)
-        guiSetProperty(desktop, "ImageColours", "tl:AAFF0000 tr:AA00FF00 bl:AA6600FF br:AA0000FF")
+        desktop = guiCreateStaticImage(screenpx, screenpy, phonew, phoneh, "images/3.png", false, phone)
+        --guiSetProperty(desktop, "ImageColours", "tl:AAFF0000 tr:AA00FF00 bl:AA6600FF br:AA0000FF")
         
         
         
         
-        statusbar = guiCreateStaticImage(0, 0, phonew, 20, "images/top.png", false, desktop)
-        guiSetProperty(statusbar, "ImageColours", "tl:FF222222 tr:FF222222 bl:FF222222 br:FF222222")
+        statusbar = guiCreateStaticImage(0, 0, phonew, 20, "images/element.png", false, desktop)
+        guiSetProperty(statusbar, "ImageColours", "tl:55222222 tr:55222222 bl:55222222 br:55222222")
         
         topmover = guiCreateStaticImage(0, 0, phonew, 21, "images/element.png", false, desktop)
-        guiSetProperty(topmover, "ImageColours", "tl:44222222 tr:44222222 bl:00000000 br:00000000") --"tl:FFBBBBBB tr:FFBBBBBB bl:FFBBBBBB br:FFBBBBBB"
+        guiSetProperty(topmover, "ImageColours", "tl:CC222222 tr:CC222222 bl:CC222222 br:CC222222") --"tl:44222222 tr:44222222 bl:00000000 br:00000000"
+        
+        scroller = guiCreateStaticImage(phonew/2-25, 0, 50, 21, "images/scroll.png", false, topmover)
+        guiSetProperty(scroller, "ImageColours", "tl:88999999 tr:88999999 bl:88999999 br:88999999")
+        guiSetEnabled(scroller, false)
+        
         guiSetAlpha(topmover, 0)
         
         toppanel = guiCreateStaticImage(0, 0, phonew, 0, "images/element.png", false, desktop)
-        guiSetProperty(toppanel, "ImageColours", "tl:44222222 tr:44222222 bl:44222222 br:44222222")
+        guiSetProperty(toppanel, "ImageColours", "tl:CC222222 tr:CC222222 bl:CC222222 br:CC222222")
         guiSetAlpha(toppanel, 0)
         
-        otherthings = guiCreateStaticImage(0.05, 0, 0.9, 1, "images/element.png", true, toppanel)
-        guiSetProperty(otherthings, "ImageColours", "tl:55AAAAAA tr:55AAAAAA bl:01AAAAAA br:01AAAAAA") 
-        guiSetEnabled(otherthings, false)
-        guiMoveToBack(otherthings)
-        
         notbarinfo = guiCreateStaticImage(0, 0, phonew, 40, "images/element.png", false, toppanel)
-        guiSetProperty(notbarinfo, "ImageColours", "tl:FF555555 tr:FF555555 bl:AA333333 br:AA333333")
+        guiSetProperty(notbarinfo, "ImageColours", "tl:00222222 tr:00222222 bl:00222222 br:00222222")
         
         timetopbar = guiCreateLabel(0, 0, phonew, 20, "12:30", false, statusbar)
         guiLabelSetHorizontalAlign(timetopbar, "center")
         guiLabelSetVerticalAlign(timetopbar, "center")
         guiSetFont(timetopbar, guiCreateFont("fonts/bold.ttf", 10))
-        guiLabelSetColor(timetopbar, 200, 160, 160)
+        guiLabelSetColor(timetopbar, 247, 247, 247)
         
-        location = guiCreateLabel(0, 0, phonew, 20, "Location", false, timetopbar)
+        location = guiCreateLabel(0, 0, phonew-4, 20, "Location", false, timetopbar)
         guiLabelSetHorizontalAlign(location, "right")
         guiLabelSetVerticalAlign(location, "center")
         guiSetFont(location, guiCreateFont("fonts/bold.ttf", 9))
-        guiLabelSetColor(location, 200, 160, 160)
+        guiLabelSetColor(location, 247, 247, 247)
         
         battery = guiCreateStaticImage(0, 1, 19, 18, "images/battery.png", false, statusbar)
-        guiSetProperty(battery, "ImageColours", "tl:FFC8A0A0 tr:FFC8A0A0 bl:FFC8A0A0 br:FFC8A0A0")
+        guiSetProperty(battery, "ImageColours", "tl:FFF7F7F7 tr:FFF7F7F7 bl:FFF7F7F7 br:FFF7F7F7")
         
         wifi = guiCreateStaticImage(19, 2, 17, 16, "images/wifi.png", false, statusbar)
-        guiSetProperty(wifi, "ImageColours", "tl:FFC8A0A0 tr:FFC8A0A0 bl:FFC8A0A0 br:FFC8A0A0")
+        guiSetProperty(wifi, "ImageColours", "tl:FFF7F7F7 tr:FFF7F7F7 bl:FFF7F7F7 br:FFF7F7F7")
         
         threeg = guiCreateStaticImage(36, 1, 19, 18, "images/thr.png", false, statusbar)
-        guiSetProperty(threeg, "ImageColours", "tl:FFC8A0A0 tr:FFC8A0A0 bl:FFC8A0A0 br:FFC8A0A0")
+        guiSetProperty(threeg, "ImageColours", "tl:FFF7F7F7 tr:FFF7F7F7 bl:FFF7F7F7 br:FFF7F7F7")
         
         timenotbar = guiCreateLabel(5, 0, 70, 40, "22:22", false, notbarinfo)
         guiLabelSetHorizontalAlign(timenotbar, "center")
@@ -296,10 +268,10 @@ addEventHandler("onClientResourceStart", root,
             if cursorPosX < phoneX+15 then setCursorPosition(phoneX+17, findPosition+5+phoneY+38) end
             if cursorPosX > phoneX+10+phonew then setCursorPosition(phoneX+phonew, findPosition+5+phoneY+38) end
             
-            if findPosition >= 0 and findPosition < 7 then
+            if findPosition == 0 then
                 guiSetAlpha(topmover, 0)
                 guiSetAlpha(toppanel, 0)
-            elseif findPosition >= 7 and findPosition < 14 then
+            --[[elseif findPosition >= 7 and findPosition < 14 then
                 guiSetAlpha(topmover, 0.1)
                 guiSetAlpha(toppanel, 0.1)
             elseif findPosition >= 14 and findPosition < 21 then
@@ -322,8 +294,8 @@ addEventHandler("onClientResourceStart", root,
                 guiSetAlpha(toppanel, 0.8)
             elseif findPosition >= 56 and findPosition < 63 then
                 guiSetAlpha(topmover, 0.9)
-                guiSetAlpha(toppanel, 0.9)
-            elseif findPosition >= 63 then
+                guiSetAlpha(toppanel, 0.9)]]
+            elseif findPosition > 0 then
                 guiSetAlpha(topmover, 1)
                 guiSetAlpha(toppanel, 1)
             end
@@ -387,11 +359,14 @@ function ocTopbar()
 end
 
 function desktopNotbarType(bool)
-    if bool == true or bool == "desktop" then guiStaticImageLoadImage(statusbar, "images/top.png")
-    else guiStaticImageLoadImage(statusbar, "images/element.png") end
-    guiStaticImageLoadImage(battery, "images/battery.png")
-    guiStaticImageLoadImage(wifi, "images/wifi.png")
-    guiStaticImageLoadImage(threeg, "images/thr.png")
+    
+    if bool == true or bool == "desktop" then guiSetProperty(statusbar, "ImageColours", "tl:99222222 tr:99222222 bl:99222222 br:99222222")
+    else guiSetProperty(statusbar, "ImageColours", "tl:FF222222 tr:FF222222 bl:FF222222 br:FF222222") end
+    --if bool == true or bool == "desktop" then guiStaticImageLoadImage(statusbar, "images/top.png")
+    --else guiStaticImageLoadImage(statusbar, "images/element.png") end
+    --guiStaticImageLoadImage(battery, "images/battery.png")
+    --guiStaticImageLoadImage(wifi, "images/wifi.png")
+    --guiStaticImageLoadImage(threeg, "images/thr.png")
 end
 
 function getNotbar()

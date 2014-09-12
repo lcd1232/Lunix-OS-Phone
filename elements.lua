@@ -2,12 +2,15 @@ local windowCount = 0
 local phoneWindow={}
 local phoneWindowStatusbarType={}
 local phoneWindowStatusbarBy={}
+
+local windowCloser = {}
+local windowOpener = {}
 function createPhoneWindow(colortop, colbottom, enablestatusbar, statusbartype)
     if enablestatusbar == nil or (enablestatusbar ~= true and enablestatusbar ~= false) then enablestatusbar = true end
     if statusbartype == nil or (statusbartype ~= "desktop" and statusbartype ~= "app") then statusbartype = "app" end
     
     if not colortop or type(colortop) == "userdata" then colortop = tocolor(80, 80, 80, 255) end 
-    if not colbottom or type(colbottom) == "userdata" then colbottom = tocolor(30, 30, 30, 255) end 
+    if not colbottom or type(colbottom) == "userdata" then colbottom = tocolor(80, 80, 80, 255) end 
     
     local w, h = getPhoneSize()
     windowCount = windowCount+1
@@ -22,11 +25,13 @@ function createPhoneWindow(colortop, colbottom, enablestatusbar, statusbartype)
     guiSetVisible(getStatusbar(), enablestatusbar)
     --desktopNotbarType(statusbartype)
     
-    guiBringToFront(getStatusbar())
+    --guiBringToFront(getStatusbar())
     guiBringToFront(getNotbar()) 
     guiBringToFront(getNotbarMover())
     
     guiSetVisible(phoneWindow[windowCount], false)
+    windowCloser[windowCount] = false
+    windowOpener[windowCount] = false
     
     return phoneWindow[windowCount], windowCount
 end
@@ -34,106 +39,85 @@ end
 function hideAllWindows()
     for i = 1, windowCount+1 do
         if not isElement(phoneWindow[i]) then return false end
-        doAnimated(phoneWindow[i], false)
+        windowCloser[i] = true
         desktopNotbarType("desktop")
         guiSetVisible(getStatusbar(), true)
     end
 end
 
+local windowX = {}
+local windowY = {}
+local phoneWid, phoneHei = getPhoneSize()
+
 function showWindow(id)
     if not isElement(phoneWindow[id]) then return false end
-    doAnimated(phoneWindow[id], true)
+    if windowCloser[id] then return false end
+    
     desktopNotbarType(phoneWindowStatusbarType[id])
+    windowX[id], windowY[id] = guiGetPosition(phoneWindow[id], false)
     guiSetVisible(getStatusbar(), phoneWindowStatusbarBy[id])
+    guiSetPosition(phoneWindow[id], windowX[id], phoneHei, false)
+    guiSetVisible(phoneWindow[id], true)
     closeTopbar()
+    windowOpener[windowCount] = true
 end
+
+addEventHandler("onClientRender", root, function()
+    for i = 0, table.maxn(windowOpener) do if windowOpener[i] == true then 
+        local x, y = guiGetPosition(phoneWindow[i], false)
+        if y < windowY[i] then 
+            guiSetPosition(phoneWindow[i], windowX[i], windowY[i], false)
+            windowOpener[i] = false
+            cancelEvent()
+            return 1 
+        end
+        guiSetPosition(phoneWindow[i], x, y-15, false)
+    end end
+end)
 
 function hideWindow(id)
     if not isElement(phoneWindow[id]) then return false end
-    doAnimated(phoneWindow[id], false)
+    if windowOpener[id] then return false end
+    
     desktopNotbarType("desktop")
+    windowX[id], windowY[id] = guiGetPosition(phoneWindow[id], false)
     guiSetVisible(getStatusbar(), true)
     closeTopbar()
+    windowCloser[id] = true
 end
 
-local elementTimer={}
-local elementType={}
-function doAnimated(element, booltype)
-    if not isElement(element) then return 1 end
-    if isTimer(elementTimer[element]) then return 1 end
-    if booltype == nil or (booltype ~= false and booltype ~= true) then booltype = not elementType[element] end
-    
-    local counting = 0
-    
-    if booltype == true then 
-        if elementType[element] == true then return 1 end
-        elementType[element] = true
-        local px, py = guiGetPosition(element, false)
-        local wi, he = guiGetSize(element, false)
-        guiSetVisible(element, true) 
-        guiSetPosition(element, px+(22*3), py+(22*8), false) 
-        guiSetSize(element, wi-(22*6), he-(22*9), false) 
-        guiSetAlpha(element, 0)
-    
-        elementTimer[element] = setTimer(function()
-            counting = counting+1
-            local posX, posY = guiGetPosition(element, false)
-            local wid, hei = guiGetSize(element, false)
-            guiSetPosition(element, posX-3, posY-8, false)
-            guiSetSize(element, wid+6, hei+9, false)
-            guiSetAlpha(element, guiGetAlpha(element)+0.05)
-            if counting >= 22 then 
-                guiSetPosition(element, px, py, false) 
-                guiSetAlpha(element, 1)
-                guiSetSize(element, wi, he, false) 
-            end
-            guiBringToFront(element)
-        end, 50, 22)
-    else
-        if elementType[element] == false then return 1 end
-        elementType[element] = false
-        local px, py = guiGetPosition(element, false)
-        local wi, he = guiGetSize(element, false)
-        guiSetVisible(element, true) 
-        guiSetPosition(element, px, py, false) 
-        guiSetSize(element, wi, he, false) 
-        guiSetAlpha(element, 1)
-        
-        elementTimer[element] = setTimer(function()
-            counting = counting+1
-            local posX, posY = guiGetPosition(element, false)
-            local wid, hei = guiGetSize(element, false)
-            guiSetPosition(element, posX+3, posY+8, false)
-            guiSetSize(element, wid-6, hei-9, false)
-            guiSetAlpha(element, guiGetAlpha(element)-0.05)
-            if counting >= 22 then 
-                guiSetVisible(element, false) 
-                guiSetPosition(element, px, py, false) 
-                guiSetAlpha(element, 1)
-                guiSetSize(element, wi, he, false) 
-            end
-            guiBringToFront(element)
-        end, 50, 22)
-    end
-end
+addEventHandler("onClientRender", root, function()
+    for i = 0, table.maxn(windowCloser) do if windowCloser[i] == true then 
+        local x, y = guiGetPosition(phoneWindow[i], false)
+        if y > phoneHei then 
+            guiSetVisible(phoneWindow[i], false)
+            guiSetPosition(phoneWindow[i], windowX[i], windowY[i], false)
+            windowCloser[i] = false
+            cancelEvent()
+            return 1 
+        end
+        guiSetPosition(phoneWindow[i], x, y+15, false)
+    end end
+end)
 
 local switchCount = 0
 local phoneSwitcher={}
 local enablingSwitch={}
 local timer={}
 function createSwitcher(x, y, enabled, parent)
-    if not x or not tonumber(x) then x = 20 end
-    if not y or not tonumber(y) then y = 20 end
+    if not x or not tonumber(x) then x = 50 end
+    if not y or not tonumber(y) then y = 50 end
     if enabled == nil or (enabled ~= false and enabled ~= true) then enabled = false end
     if parent == nil or not isElement(parent) then parent = getDesktop() end
     
     switchCount = switchCount+1
     phoneSwitcher[switchCount]={}
-    phoneSwitcher[switchCount]["Switcher"] = guiCreateStaticImage(x, y, 50, 20, "images/switcher.png", false, parent)
-    phoneSwitcher[switchCount]["Switch"] = guiCreateStaticImage(0, 0, 20, 20, "images/switch.png", false, phoneSwitcher[switchCount]["Switcher"])
+    phoneSwitcher[switchCount]["Switcher"] = guiCreateStaticImage(x, y, 50, 20, "images/element.png", false, parent)
+    phoneSwitcher[switchCount]["Switch"] = guiCreateStaticImage(1, 1, 18, 18, "images/element.png", false, phoneSwitcher[switchCount]["Switcher"])
     enablingSwitch[phoneSwitcher[switchCount]["Switcher"] ] = enabled
-    if enabled == true then guiSetProperty(phoneSwitcher[switchCount]["Switcher"], "ImageColours", "tl:FF00FF00 tr:FF00FF00 bl:FF00FF00 br:FF00FF00") guiSetPosition(phoneSwitcher[switchCount]["Switch"], 30, 0, false)
-    else guiSetProperty(phoneSwitcher[switchCount]["Switcher"], "ImageColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000") guiSetPosition(phoneSwitcher[switchCount]["Switch"], 0, 0, false) end
+    guiSetProperty(phoneSwitcher[switchCount]["Switch"], "ImageColours", "tl:FFAAAAAA tr:FFAAAAAA bl:FFAAAAAA br:FFAAAAAA")
+    if enabled == true then guiSetProperty(phoneSwitcher[switchCount]["Switcher"], "ImageColours", "tl:F700AA00 tr:F700AA00 bl:F700AA00 br:F700AA00") guiSetPosition(phoneSwitcher[switchCount]["Switch"], 31, 1, false)
+    else guiSetProperty(phoneSwitcher[switchCount]["Switcher"], "ImageColours", "tl:F7AA0000 tr:F7AA0000 bl:F7AA0000 br:F7AA0000") guiSetPosition(phoneSwitcher[switchCount]["Switch"], 1, 1, false) end
      
     switching(switchCount)
     
@@ -156,10 +140,10 @@ function switching(id)
                 timer[id] = setTimer(function()
                 
                     local x = guiGetPosition(phoneSwitcher[id]["Switch"], false)
-                    guiSetPosition(phoneSwitcher[id]["Switch"], x-10, 0, false)
-                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000")
+                    guiSetPosition(phoneSwitcher[id]["Switch"], x-5, 1, false)
+                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F7AA0000 tr:F7AA0000 bl:F7AA0000 br:F7AA0000")
                     
-                end, 50, 3)
+                end, 50, 6)
                 
                 triggerEvent("onClientDisableSwitcher", localPlayer, id)
                 
@@ -171,10 +155,10 @@ function switching(id)
                 timer[id] = setTimer(function()
                 
                     local x = guiGetPosition(phoneSwitcher[id]["Switch"], false)
-                    guiSetPosition(phoneSwitcher[id]["Switch"], x+10, 0, false)
-                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:FF00FF00 tr:FF00FF00 bl:FF00FF00 br:FF00FF00")
+                    guiSetPosition(phoneSwitcher[id]["Switch"], x+5, 1, false)
+                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F700AA00 tr:F700AA00 bl:F700AA00 br:F700AA00")
                     
-                end, 50, 3)
+                end, 50, 6)
                 
                 triggerEvent("onClientEnableSwitcher", localPlayer, id)
                 
@@ -190,10 +174,10 @@ function switching(id)
                 timer[id] = setTimer(function()
                 
                     local x = guiGetPosition(phoneSwitcher[id]["Switch"], false)
-                    guiSetPosition(phoneSwitcher[id]["Switch"], x-10, 0, false)
-                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000")
+                    guiSetPosition(phoneSwitcher[id]["Switch"], x-5, 1, false)
+                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F7AA0000 tr:F7AA0000 bl:F7AA0000 br:F7AA0000")
                     
-                end, 50, 3)
+                end, 50, 6)
                 
                 triggerEvent("onClientDisableSwitcher", localPlayer, id)
                 
@@ -205,10 +189,10 @@ function switching(id)
                 timer[id] = setTimer(function()
                 
                     local x = guiGetPosition(phoneSwitcher[id]["Switch"], false)
-                    guiSetPosition(phoneSwitcher[id]["Switch"], x+10, 0, false)
-                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:FF00FF00 tr:FF00FF00 bl:FF00FF00 br:FF00FF00")
+                    guiSetPosition(phoneSwitcher[id]["Switch"], x+5, 1, false)
+                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F700AA00 tr:F700AA00 bl:F700AA00 br:F700AA00")
                     
-                end, 50, 3)
+                end, 50, 6)
                 
                 triggerEvent("onClientEnableSwitcher", localPlayer, id)
                 
@@ -342,6 +326,18 @@ function destroy(id, movable, title)
             setCursorPosition((phoneX+screenX+notW)-15, cursorPosY)
         end
         
+        if notX < phonew-110 then guiSetAlpha(Notification[id], 1) end
+        if notX >= phonew-110 and notX < phonew-100 then guiSetAlpha(Notification[id], 0.9) end
+        if notX >= phonew-100 and notX < phonew-90 then guiSetAlpha(Notification[id], 0.8) end
+        if notX >= phonew-90 and notX < phonew-80 then guiSetAlpha(Notification[id], 0.7) end
+        if notX >= phonew-80 and notX < phonew-70 then guiSetAlpha(Notification[id], 0.6) end
+        if notX >= phonew-70 and notX < phonew-60 then guiSetAlpha(Notification[id], 0.5) end
+        if notX >= phonew-60 and notX < phonew-50 then guiSetAlpha(Notification[id], 0.4) end
+        if notX >= phonew-50 and notX < phonew-40 then guiSetAlpha(Notification[id], 0.3) end
+        if notX >= phonew-40 and notX < phonew-30 then guiSetAlpha(Notification[id], 0.2) end
+        if notX >= phonew-30 and notX < phonew-20 then guiSetAlpha(Notification[id], 0.1) end
+        if notX >= phonew-20 then guiSetAlpha(Notification[id], 0) end
+        
         if cursorPosY < phoneY+screenY+notY+40 then setCursorPosition(cursorPosX, phoneY+screenY+notY+40) end
         if cursorPosY > (phoneY+screenY+notY+40+notH)-15 then setCursorPosition(cursorPosX, (phoneY+screenY+notY+40+notH)-15) end
         --if cursorPosY < (phoneY+screenY+notY+notH)-10 then setCursorPosition(cursorPosX, (phoneY+screenY+notY+notH)-10) end
@@ -351,35 +347,111 @@ function destroy(id, movable, title)
     end)
 end
 
-local moveTimer={}
+local enableNotification={}
+local getModuleNotification={}
+local elementPosY={}
 function moveBackNotification(id)
     if not isElement(Notification[id]) then return false end
-    if isTimer(moveTimer[id]) then return false end
-    local posX, posY = guiGetPosition(Notification[id], false)
+    if enableNotification[id] then return false end
+    local posX = 0
+    posX, elementPosY[id] = guiGetPosition(Notification[id], false)
     
-    local getMod = math.fmod(posX, 40)
-    local timerNumber =  math.abs( (posX-getMod) /40 )+1 
-    
-    local num = 0
-    moveTimer[id] = setTimer(function()
-        local newPosX = guiGetPosition(Notification[id], false)
-        if newPosX == 0 then return 1 end
-        if newPosX < 0 then newPosX = 0 end
-        if newPosX > 0 then
-            if num == 0 then
-                num = 1
-                guiSetPosition(Notification[id], newPosX-getMod, posY, false)
-            else
-                guiSetPosition(Notification[id], newPosX-40, posY, false)
-            end
-        end
-    end, 50, timerNumber)
+    getModuleNotification[id] = math.fmod(posX, 10)
+    enableNotification[id] = true
 end
 
-local nottimer={}
+addEventHandler("onClientRender", root, function()
+    for i = 0, table.maxn(enableNotification) do if enableNotification[i] == true then 
+        local newPosX = guiGetPosition(Notification[i], false)
+        if newPosX <= 0 then
+            guiSetPosition(Notification[i], 0, elementPosY[i], false)
+            enableNotification[i] = false
+            cancelEvent() 
+            return 1 
+        else
+            if num == 0 then
+                num = 1
+                guiSetPosition(Notification[i], newPosX-getModuleNotification[i], elementPosY[i], false)
+            else
+                guiSetPosition(Notification[i], newPosX-10, elementPosY[i], false)
+            end
+        
+            if newPosX < phoneWid-110 then guiSetAlpha(Notification[i], 1) end
+            if newPosX >= phoneWid-110 and newPosX < phoneWid-100 then guiSetAlpha(Notification[i], 0.9) end
+            if newPosX >= phoneWid-100 and newPosX < phoneWid-90 then guiSetAlpha(Notification[i], 0.8) end
+            if newPosX >= phoneWid-90 and newPosX < phoneWid-80 then guiSetAlpha(Notification[i], 0.7) end
+            if newPosX >= phoneWid-80 and newPosX < phoneWid-70 then guiSetAlpha(Notification[i], 0.6) end
+            if newPosX >= phoneWid-70 and newPosX < phoneWid-60 then guiSetAlpha(Notification[i], 0.5) end
+            if newPosX >= phoneWid-60 and newPosX < phoneWid-50 then guiSetAlpha(Notification[i], 0.4) end
+            if newPosX >= phoneWid-50 and newPosX < phoneWid-40 then guiSetAlpha(Notification[i], 0.3) end
+            if newPosX >= phoneWid-40 and newPosX < phoneWid-30 then guiSetAlpha(Notification[i], 0.2) end
+            if newPosX >= phoneWid-30 and newPosX < phoneWid-20 then guiSetAlpha(Notification[i], 0.1) end
+            if newPosX >= phoneWid-20 then guiSetAlpha(Notification[i], 0) end
+        end
+    end end
+end)
+
+local notificationEditor={}
+local elementsPos={}
+local elementsWidth={}
+local elementsHeight={}
 function destroyNotification(id)
     if not isElement(Notification[id]) then return false end
-    if isTimer(nottimer[id]) then return 1; end 
+    if notificationEditor[id] then return false end
+    
+    _, elementsPos[id] = guiGetPosition(Notification[id], false)
+    elementsWidth[id], elementsHeight[id] = guiGetSize(Notification[id], false)
+
+    notificationEditor[id] = true
+end
+
+addEventHandler("onClientRender", root, function()
+    for i = 0, table.maxn(notificationEditor) do if notificationEditor[i] == true then 
+        if not isElement(Notification[i]) then
+            notificationEditor[i] = false
+            cancelEvent() 
+            return 1 
+        end
+        
+        local newPosX = guiGetPosition(Notification[i], false)
+        if newPosX == false then
+            notificationEditor[i] = false
+            cancelEvent() 
+            return 1 
+        end
+        
+        if newPosX < phoneWid-110 then guiSetAlpha(Notification[i], 1) end
+        if newPosX >= phoneWid-110 and newPosX < phoneWid-100 then guiSetAlpha(Notification[i], 0.9) end
+        if newPosX >= phoneWid-100 and newPosX < phoneWid-90 then guiSetAlpha(Notification[i], 0.8) end
+        if newPosX >= phoneWid-90 and newPosX < phoneWid-80 then guiSetAlpha(Notification[i], 0.7) end
+        if newPosX >= phoneWid-80 and newPosX < phoneWid-70 then guiSetAlpha(Notification[i], 0.6) end
+        if newPosX >= phoneWid-70 and newPosX < phoneWid-60 then guiSetAlpha(Notification[i], 0.5) end
+        if newPosX >= phoneWid-60 and newPosX < phoneWid-50 then guiSetAlpha(Notification[i], 0.4) end
+        if newPosX >= phoneWid-50 and newPosX < phoneWid-40 then guiSetAlpha(Notification[i], 0.3) end
+        if newPosX >= phoneWid-40 and newPosX < phoneWid-30 then guiSetAlpha(Notification[i], 0.2) end
+        if newPosX >= phoneWid-30 and newPosX < phoneWid-20 then guiSetAlpha(Notification[i], 0.1) end
+        if newPosX >= phoneWid-20 then guiSetAlpha(Notification[i], 0) end
+        
+        if newPosX > elementsWidth[i] then
+            destroyElement(Notification[i])
+            table.remove(allNotifications, i) 
+            triggerEvent("setSize", localPlayer, -elementsHeight[i])
+            
+            for z = 0, table.maxn(allNotifications)+1 do 
+                if isElement(Notification[z]) then
+                    local nPosX, nPosY = guiGetPosition(Notification[z], false)
+                    if nPosY > elementsPos[i] then guiSetPosition(Notification[z], nPosX, nPosY-elementsHeight[i]-1, false) end
+                end
+            end
+            local notHeight = getNotificationMenuSize()
+            if notHeight <= 0 then closeTopbar() guiSetVisible(getNotificationClear(), false) end
+            return 1
+        end
+        guiSetPosition(Notification[i], newPosX+10, elementsPos[i], false)
+    end end
+end)
+--[[function destroyNotification(id)
+    if not isElement(Notification[id]) then return false end
     
     local posX, posY = guiGetPosition(Notification[id], false)
     local width, heights = guiGetSize(Notification[id], false)
@@ -393,9 +465,6 @@ function destroyNotification(id)
         
         local timerPosX = guiGetPosition(Notification[id], false)
         if timerPosX == false then 
-            if isTimer(nottimer[id]) then 
-                return 1; 
-            end 
             return 1; 
         end
         
@@ -403,9 +472,6 @@ function destroyNotification(id)
             guiSetPosition(Notification[id], timerPosX+18, posY, false)
         else
             if not isElement(Notification[id]) then 
-                if isTimer(nottimer[id]) then 
-                    return 1;  
-                end 
                 return 1; 
             end
             
@@ -425,8 +491,23 @@ function destroyNotification(id)
             local notHeight = getNotificationMenuSize()
             if notHeight <= 0 then closeTopbar() guiSetVisible(getNotificationClear(), false) end
         end
+        if not isElement(Notification[id]) then 
+            return 1; 
+        end
+        
+        if timerPosX < phonew-110 then guiSetAlpha(Notification[id], 1) end
+        if timerPosX >= phonew-110 and timerPosX < phonew-100 then guiSetAlpha(Notification[id], 0.9) end
+        if timerPosX >= phonew-100 and timerPosX < phonew-90 then guiSetAlpha(Notification[id], 0.8) end
+        if timerPosX >= phonew-90 and timerPosX < phonew-80 then guiSetAlpha(Notification[id], 0.7) end
+        if timerPosX >= phonew-80 and timerPosX < phonew-70 then guiSetAlpha(Notification[id], 0.6) end
+        if timerPosX >= phonew-70 and timerPosX < phonew-60 then guiSetAlpha(Notification[id], 0.5) end
+        if timerPosX >= phonew-60 and timerPosX < phonew-50 then guiSetAlpha(Notification[id], 0.4) end
+        if timerPosX >= phonew-50 and timerPosX < phonew-40 then guiSetAlpha(Notification[id], 0.3) end
+        if timerPosX >= phonew-40 and timerPosX < phonew-30 then guiSetAlpha(Notification[id], 0.2) end
+        if timerPosX >= phonew-30 and timerPosX < phonew-20 then guiSetAlpha(Notification[id], 0.1) end
+        if timerPosX >= phonew-20 then guiSetAlpha(Notification[id], 0) end
     end, 50, 23)
-end
+end]]
 
 function getNotificationCount()
     return table.maxn(allNotifications)
@@ -721,6 +802,6 @@ end
 1) onClientClickFirstAccept; onClientClickSecondAccept; onClientClickThirdAccept; onClientClickFourAccept
 Returns ID of accepted button in accept-panel
 
-2) onClientDisableSwitcher; onClientEnableSwitcher 
+2) onClientDisableSwitcher; onClientEnableSwitcher
 Returns ID of switcher, what changed
 ]]

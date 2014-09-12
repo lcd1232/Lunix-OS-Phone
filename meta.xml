@@ -8,13 +8,14 @@
     <file src="images/element.png"/>
     <file src="images/phone.png"/>
     <file src="images/phonew.png"/>
-    <file src="images/top.png"/>
-    <file src="images/switcher.png"/>
-    <file src="images/switch.png"/>
     <file src="images/clear.png"/>
     <file src="images/battery.png"/>
     <file src="images/wifi.png"/>
     <file src="images/thr.png"/>
+    <file src="images/scroll.png"/>
+    <file src="images/1.png"/>
+    <file src="images/2.png"/>
+    <file src="images/3.png"/>
     
     <file src="fonts/bold.ttf"/>
     <file src="fonts/light.ttf"/>
