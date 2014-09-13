@@ -14,7 +14,7 @@ function createPhoneWindow(colortop, colbottom, enablestatusbar, statusbartype)
     
     local w, h = getPhoneSize()
     windowCount = windowCount+1
-    phoneWindow[windowCount] = guiCreateStaticImage(0, enablestatusbar == false and 0 or 20, w, enablestatusbar == false and h or h-20, "images/element.png", false, getDesktop())
+    phoneWindow[windowCount] = guiCreateStaticImage(0, 0, w, h, "images/element.png", false, getDesktop())
     phoneWindowStatusbarType[windowCount] = statusbartype
     phoneWindowStatusbarBy[windowCount] = enablestatusbar
     
@@ -22,7 +22,7 @@ function createPhoneWindow(colortop, colbottom, enablestatusbar, statusbartype)
     colbottom = string.format("%x", colbottom)
     guiSetProperty(phoneWindow[windowCount], "ImageColours", "tl:"..colortop.." tr:"..colortop.." bl:"..colbottom.." br:"..colbottom.."")
     
-    guiSetVisible(getStatusbar(), enablestatusbar)
+    --guiSetVisible(getStatusbar(), enablestatusbar)
     --desktopNotbarType(statusbartype)
     
     --guiBringToFront(getStatusbar())
@@ -35,8 +35,10 @@ function createPhoneWindow(colortop, colbottom, enablestatusbar, statusbartype)
     
     return phoneWindow[windowCount], windowCount
 end
+local settingsPanel = {}
 
 function hideAllWindows()
+    closeTopbar()
     for i = 1, windowCount+1 do
         if not isElement(phoneWindow[i]) then return false end
         windowCloser[i] = true
@@ -63,16 +65,24 @@ function showWindow(id)
 end
 
 addEventHandler("onClientRender", root, function()
-    for i = 0, table.maxn(windowOpener) do if windowOpener[i] == true then 
-        local x, y = guiGetPosition(phoneWindow[i], false)
-        if y < windowY[i] then 
-            guiSetPosition(phoneWindow[i], windowX[i], windowY[i], false)
-            windowOpener[i] = false
-            cancelEvent()
-            return 1 
-        end
-        guiSetPosition(phoneWindow[i], x, y-15, false)
-    end end
+    
+    guiBringToFront(getStatusbar())
+    guiBringToFront(getNotbar()) 
+    guiBringToFront(getNotbarMover())
+    
+    for i = 0, table.maxn(windowOpener) do 
+        if windowOpener[i] == true then 
+            local x, y = guiGetPosition(phoneWindow[i], false)
+        
+            if y < windowY[i] then 
+                guiSetPosition(phoneWindow[i], windowX[i], windowY[i], false)
+                windowOpener[i] = false
+                cancelEvent()
+                return 1 
+            end
+            guiSetPosition(phoneWindow[i], x, y-25, false)
+        end 
+    end
 end)
 
 function hideWindow(id)
@@ -87,17 +97,24 @@ function hideWindow(id)
 end
 
 addEventHandler("onClientRender", root, function()
-    for i = 0, table.maxn(windowCloser) do if windowCloser[i] == true then 
-        local x, y = guiGetPosition(phoneWindow[i], false)
-        if y > phoneHei then 
-            guiSetVisible(phoneWindow[i], false)
-            guiSetPosition(phoneWindow[i], windowX[i], windowY[i], false)
-            windowCloser[i] = false
-            cancelEvent()
-            return 1 
-        end
-        guiSetPosition(phoneWindow[i], x, y+15, false)
-    end end
+    for i = 0, table.maxn(windowCloser) do  
+        if windowCloser[i] == true then 
+            local x, y = guiGetPosition(phoneWindow[i], false)
+    
+            guiBringToFront(getStatusbar())
+            guiBringToFront(getNotbar()) 
+            guiBringToFront(getNotbarMover())
+        
+            if y > phoneHei then 
+                guiSetVisible(phoneWindow[i], false)
+                guiSetPosition(phoneWindow[i], windowX[i], windowY[i], false)
+                windowCloser[i] = false
+                cancelEvent()
+                return 1 
+            end
+            guiSetPosition(phoneWindow[i], x, y+30, false)
+        end 
+    end
 end)
 
 local switchCount = 0
@@ -112,12 +129,12 @@ function createSwitcher(x, y, enabled, parent)
     
     switchCount = switchCount+1
     phoneSwitcher[switchCount]={}
-    phoneSwitcher[switchCount]["Switcher"] = guiCreateStaticImage(x, y, 50, 20, "images/element.png", false, parent)
-    phoneSwitcher[switchCount]["Switch"] = guiCreateStaticImage(1, 1, 18, 18, "images/element.png", false, phoneSwitcher[switchCount]["Switcher"])
+    phoneSwitcher[switchCount]["Switcher"] = guiCreateStaticImage(x, y, 50, 20, "images/switcher.png", false, parent)
+    phoneSwitcher[switchCount]["Switch"] = guiCreateStaticImage(1, 1, 18, 18, "images/switch.png", false, phoneSwitcher[switchCount]["Switcher"])
     enablingSwitch[phoneSwitcher[switchCount]["Switcher"] ] = enabled
-    guiSetProperty(phoneSwitcher[switchCount]["Switch"], "ImageColours", "tl:FFAAAAAA tr:FFAAAAAA bl:FFAAAAAA br:FFAAAAAA")
-    if enabled == true then guiSetProperty(phoneSwitcher[switchCount]["Switcher"], "ImageColours", "tl:F700AA00 tr:F700AA00 bl:F700AA00 br:F700AA00") guiSetPosition(phoneSwitcher[switchCount]["Switch"], 31, 1, false)
-    else guiSetProperty(phoneSwitcher[switchCount]["Switcher"], "ImageColours", "tl:F7AA0000 tr:F7AA0000 bl:F7AA0000 br:F7AA0000") guiSetPosition(phoneSwitcher[switchCount]["Switch"], 1, 1, false) end
+    --guiSetProperty(phoneSwitcher[switchCount]["Switch"], "ImageColours", "tl:FFAAAAAA tr:FFAAAAAA bl:FFAAAAAA br:FFAAAAAA")
+    if enabled == true then guiSetPosition(phoneSwitcher[switchCount]["Switch"], 31, 1, false)
+    else guiSetPosition(phoneSwitcher[switchCount]["Switch"], 1, 1, false) end
      
     switching(switchCount)
     
@@ -141,7 +158,7 @@ function switching(id)
                 
                     local x = guiGetPosition(phoneSwitcher[id]["Switch"], false)
                     guiSetPosition(phoneSwitcher[id]["Switch"], x-5, 1, false)
-                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F7AA0000 tr:F7AA0000 bl:F7AA0000 br:F7AA0000")
+                    --guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F7AA0000 tr:F7AA0000 bl:F7AA0000 br:F7AA0000")
                     
                 end, 50, 6)
                 
@@ -156,7 +173,7 @@ function switching(id)
                 
                     local x = guiGetPosition(phoneSwitcher[id]["Switch"], false)
                     guiSetPosition(phoneSwitcher[id]["Switch"], x+5, 1, false)
-                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F700AA00 tr:F700AA00 bl:F700AA00 br:F700AA00")
+                    --guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F700AA00 tr:F700AA00 bl:F700AA00 br:F700AA00")
                     
                 end, 50, 6)
                 
@@ -175,7 +192,7 @@ function switching(id)
                 
                     local x = guiGetPosition(phoneSwitcher[id]["Switch"], false)
                     guiSetPosition(phoneSwitcher[id]["Switch"], x-5, 1, false)
-                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F7AA0000 tr:F7AA0000 bl:F7AA0000 br:F7AA0000")
+                    --guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F7AA0000 tr:F7AA0000 bl:F7AA0000 br:F7AA0000")
                     
                 end, 50, 6)
                 
@@ -190,7 +207,7 @@ function switching(id)
                 
                     local x = guiGetPosition(phoneSwitcher[id]["Switch"], false)
                     guiSetPosition(phoneSwitcher[id]["Switch"], x+5, 1, false)
-                    guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F700AA00 tr:F700AA00 bl:F700AA00 br:F700AA00")
+                    --guiSetProperty(phoneSwitcher[id]["Switcher"], "ImageColours", "tl:F700AA00 tr:F700AA00 bl:F700AA00 br:F700AA00")
                     
                 end, 50, 6)
                 
@@ -805,3 +822,192 @@ Returns ID of accepted button in accept-panel
 2) onClientDisableSwitcher; onClientEnableSwitcher
 Returns ID of switcher, what changed
 ]]
+
+local settingsInfo = {}
+local clicked = {}
+local setNewPosition = {}
+
+local settsOpener = {}
+local settsCloser = {}
+local settsX = {}
+local settsY = {}
+function openSettingsElement(id)
+    if not isElement(settingsPanel[id]) then return false end
+    if settsCloser[id] then return false end
+    
+    settsX[id], settsY[id] = guiGetPosition(settingsPanel[id], false)
+    settsOpener[id] = true
+end
+
+addEventHandler("onClientRender", root, function()
+    for i = 1, table.maxn(settsOpener) do  
+        if settsOpener[i] == true then 
+            local x, y = guiGetPosition(settingsPanel[i], false)
+        
+            if y < phoneHei-190 then 
+                guiSetPosition(settingsPanel[i], x, phoneHei-205, false)
+                settsOpener[i] = false
+                cancelEvent()
+                return 1 
+            end
+            guiSetPosition(settingsPanel[i], x, y-15, false)
+            
+            if y == phoneHei-15  then guiSetAlpha(settingsPanel[i], 0)
+            elseif y < phoneHei-15 then guiSetAlpha(settingsPanel[i], 1) end
+        end 
+    end
+end)
+function closeSettingsElement(id)
+    if not isElement(settingsPanel[id]) then return false end
+    if settsOpener[id] then return false end
+    
+    settsX[id], settsY[id] = guiGetPosition(settingsPanel[id], false)
+    settsCloser[id] = true
+end
+
+addEventHandler("onClientRender", root, function()
+    for i = 1, table.maxn(settsCloser) do  
+        if settsCloser[i] == true then 
+            local x, y = guiGetPosition(settingsPanel[i], false)
+        
+            if y >= phoneHei-15 then 
+                guiSetPosition(settingsPanel[i], x, phoneHei-15, false)
+                guiSetAlpha(settingsPanel[i], 0)
+                settsCloser[i] = false
+                cancelEvent()
+                return 1 
+            end
+            
+            guiSetPosition(settingsPanel[i], x, y+15, false)
+        end 
+    end
+end)
+
+local allElementsOfSettsPanel={}
+local allDetailsOfSettsPanel={}
+function createSettingsPanel(id)
+    if not isElement(phoneWindow[id]) then return false end
+    if isElement(settingsPanel[id]) then return false end
+    
+    settingsInfo[id] = {}
+    allElementsOfSettsPanel[id]={}
+    allDetailsOfSettsPanel[id]={}
+    
+    settingsPanel[id] = guiCreateStaticImage(0, phoneHei-15, phoneWid, 205, "images/element.png", false, phoneWindow[id])
+    guiSetProperty(settingsPanel[id], "ImageColours", "tl:CC222222 tr:CC222222 bl:CC222222 br:CC222222")
+    
+    settingsInfo[id]["Scroller"] = guiCreateStaticImage(phoneWid/2-25, 0, 50, 13, "images/scroll.png", false, settingsPanel[id])
+    guiSetProperty(settingsInfo[id]["Scroller"], "ImageColours", "tl:88999999 tr:88999999 bl:88999999 br:88999999")
+    guiSetEnabled(settingsInfo[id]["Scroller"], false)
+        
+    settingsInfo[id]["Paned"]  = guiCreateScrollPane(0, 15, phoneWid, 190, false, settingsPanel[id])
+    
+    local allEls = 0
+    settingsInfo[id]["Pane"] = guiCreateStaticImage(0, 0, phoneWid, 0, "images/element.png", false, settingsInfo[id]["Paned"])
+    guiSetProperty(settingsInfo[id]["Pane"], "ImageColours", "tl:00000000 tr:00000000 bl:00000000 br:00000000")
+    
+    clicked[id] = false
+    setNewPosition[id] = 0
+    settsOpener[id] = false
+    settsCloser[id] = false
+    
+    addEventHandler("onClientGUIMouseDown", root, function(Button, _, ScrollY)
+        if source ~= settingsPanel[id] then return 1 end
+        if Button ~= "left" then return 1 end
+            
+        guiBringToFront(settingsPanel[id])
+            
+        clicked[id] = true
+            
+        local _, ScrollPosition = guiGetPosition(settingsPanel[id], false)
+        setNewPosition[id] = ScrollY-ScrollPosition
+    end)
+        
+    addEventHandler("onClientGUIMouseUp", root, function()
+        if source ~= settingsPanel[id] then return 1 end
+            
+        guiBringToFront(settingsPanel[id])
+            
+        local _, ScrollPosition = guiGetPosition(settingsPanel[id], false)
+        local phonew, phoneh = getPhoneSize() 
+            
+        if clicked[id] then
+            if ScrollPosition < phoneh-102 then openSettingsElement(id) 
+            else closeSettingsElement(id) end
+        else
+            if ScrollPosition < phoneh-102 then closeSettingsElement(id)
+            else openSettingsElement(id) end
+        end
+            
+        clicked[id] = false
+    end)
+        
+    addEventHandler("onClientCursorMove", root, function(_, _, cursorPosX, cursorPosY)
+        
+        if not clicked[id] then return 1; end
+            
+        local phoneX, phoneY = getPhonePosition()
+        local phonew, phoneh = getPhoneSize() 
+        local _, newYPos     = guiGetPosition(settingsPanel[id], false)
+            
+        local findPosition = cursorPosY-setNewPosition[id]
+            
+        if findPosition < phoneh-205 then 
+            findPosition = phoneh-205 
+            setCursorPosition(cursorPosX, findPosition+5+phoneY+38)
+        end 
+        if findPosition > phoneh-15 then 
+            findPosition = phoneh-15 
+            setCursorPosition(cursorPosX, findPosition+5+phoneY+38)
+        end 
+            
+        if cursorPosX < phoneX+15 then setCursorPosition(phoneX+17, findPosition+5+phoneY+38) end
+        if cursorPosX > phoneX+10+phonew then setCursorPosition(phoneX+phonew, findPosition+5+phoneY+38) end
+            
+        if findPosition == phoneh-15  then guiSetAlpha(settingsPanel[id], 0)
+        elseif findPosition < phoneh-15 then guiSetAlpha(settingsPanel[id], 1) end
+                
+        guiSetPosition(settingsPanel[id], 0, findPosition, false)
+    end)
+    guiSetAlpha(settingsPanel[id], 0)
+    
+    return id
+end
+
+function addSettingsPanelElement(id, text)
+    if not isElement(settingsPanel[id]) then return false end
+    local allEls = 0
+    for i = 0, table.maxn(allElementsOfSettsPanel[id]) do if isElement(allElementsOfSettsPanel[id][i]) then allEls = allEls+1 outputDebugString("True") end end
+    if not text then text = "Option "..tostring(allEls) end
+    
+    allDetailsOfSettsPanel[id][allEls] = guiCreateStaticImage(10, 26*allEls, phoneWid-20, 25, "images/element.png", false, settingsInfo[id]["Pane"])
+    guiSetProperty(allDetailsOfSettsPanel[id][allEls], "ImageColours", "tl:CC222222 tr:CC222222 bl:CC222222 br:CC222222")
+    
+    allElementsOfSettsPanel[id][allEls] = guiCreateLabel(0, 0, phoneWid-20, 25, tostring(text), false, allDetailsOfSettsPanel[id][allEls])
+    guiLabelSetHorizontalAlign(allElementsOfSettsPanel[id][allEls], "center")
+    guiLabelSetVerticalAlign(allElementsOfSettsPanel[id][allEls], "center")
+    guiSetFont(allElementsOfSettsPanel[id][allEls], guiCreateFont("fonts/medium.ttf", 12))
+    
+    guiSetSize(settingsInfo[id]["Pane"], phoneWid, (26*allEls)+26, false)
+    
+    addEventHandler("onClientMouseEnter", allElementsOfSettsPanel[id][allEls], function() 
+        if source == allElementsOfSettsPanel[id][allEls] then 
+            guiSetProperty(allDetailsOfSettsPanel[id][allEls], "ImageColours", "tl:CC555555 tr:CC555555 bl:CC555555 br:CC555555")
+            guiSetAlpha(allElementsOfSettsPanel[id][allEls], 0.5) 
+        end 
+    end)
+    addEventHandler("onClientMouseLeave", allElementsOfSettsPanel[id][allEls], function() 
+        if source == allElementsOfSettsPanel[id][allEls] then 
+            guiSetProperty(allDetailsOfSettsPanel[id][allEls], "ImageColours", "tl:CC222222 tr:CC222222 bl:CC222222 br:CC222222")
+            guiSetAlpha(allElementsOfSettsPanel[id][allEls],  1 ) 
+        end 
+    end)
+    addEventHandler("onClientGUIClick", allElementsOfSettsPanel[id][allEls], 
+        function()
+            if source == allElementsOfSettsPanel[id][allEls] then
+                closeSettingsElement(id)
+                triggerEvent("onClientSelectedSettingsPanelElement", localPlayer, id, tostring(text))
+            end
+        end, false)
+    
+end

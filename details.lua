@@ -128,7 +128,10 @@ addEventHandler("onClientResourceStart", root,
         desktop = guiCreateStaticImage(screenpx, screenpy, phonew, phoneh, "images/3.png", false, phone)
         --guiSetProperty(desktop, "ImageColours", "tl:AAFF0000 tr:AA00FF00 bl:AA6600FF br:AA0000FF")
         
-        
+        --[[lunixphone = guiCreateLabel(0, 200, phonew, 100, "Lunix OS Phone", false, desktop)
+        guiLabelSetHorizontalAlign(lunixphone, "center")
+        guiLabelSetVerticalAlign(lunixphone, "center")
+        guiSetFont(lunixphone, guiCreateFont("fonts/thin-italic.ttf", 29))]]
         
         
         statusbar = guiCreateStaticImage(0, 0, phonew, 20, "images/element.png", false, desktop)
@@ -137,7 +140,7 @@ addEventHandler("onClientResourceStart", root,
         topmover = guiCreateStaticImage(0, 0, phonew, 21, "images/element.png", false, desktop)
         guiSetProperty(topmover, "ImageColours", "tl:CC222222 tr:CC222222 bl:CC222222 br:CC222222") --"tl:44222222 tr:44222222 bl:00000000 br:00000000"
         
-        scroller = guiCreateStaticImage(phonew/2-25, 0, 50, 21, "images/scroll.png", false, topmover)
+        scroller = guiCreateStaticImage(phonew/2-25, 8, 50, 13, "images/scroll.png", false, topmover)
         guiSetProperty(scroller, "ImageColours", "tl:88999999 tr:88999999 bl:88999999 br:88999999")
         guiSetEnabled(scroller, false)
         
@@ -194,6 +197,11 @@ addEventHandler("onClientResourceStart", root,
         notificationclear = guiCreateStaticImage(phonew-40, 0, 40, 40, "images/clear.png", false, notbarinfo)
         guiSetProperty(notificationclear, "ImageColours", "tl:FF999999 tr:FF999999 bl:FF999999 br:FF999999")
         guiSetVisible(notificationclear, false)
+        
+        homebutton = guiCreateStaticImage(13, 458, 275, 30, "images/element.png", false, phone)
+        guiSetProperty(homebutton, "ImageColours", "tl:01111111 tr:01111111 bl:01111111 br:01111111")
+        
+        addEventHandler("onClientGUIClick", homebutton, hideAllWindows, false)
         
         addEventHandler("onClientMouseEnter", notificationclear, function() if source == notificationclear then guiSetAlpha(notificationclear, 0.5) end end)
         addEventHandler("onClientMouseLeave", notificationclear, function() if source == notificationclear then guiSetAlpha(notificationclear, 1) end end)
@@ -271,30 +279,6 @@ addEventHandler("onClientResourceStart", root,
             if findPosition == 0 then
                 guiSetAlpha(topmover, 0)
                 guiSetAlpha(toppanel, 0)
-            --[[elseif findPosition >= 7 and findPosition < 14 then
-                guiSetAlpha(topmover, 0.1)
-                guiSetAlpha(toppanel, 0.1)
-            elseif findPosition >= 14 and findPosition < 21 then
-                guiSetAlpha(topmover, 0.3)
-                guiSetAlpha(toppanel, 0.3)
-            elseif findPosition >= 21 and findPosition < 28 then
-                guiSetAlpha(topmover, 0.4)
-                guiSetAlpha(toppanel, 0.4)
-            elseif findPosition >= 28 and findPosition < 35 then
-                guiSetAlpha(topmover, 0.5)
-                guiSetAlpha(toppanel, 0.5)
-            elseif findPosition >= 35 and findPosition < 42 then
-                guiSetAlpha(topmover, 0.6)
-                guiSetAlpha(toppanel, 0.6)
-            elseif findPosition >= 42 and findPosition < 49 then
-                guiSetAlpha(topmover, 0.7)
-                guiSetAlpha(toppanel, 0.7)
-            elseif findPosition >= 49 and findPosition < 56 then
-                guiSetAlpha(topmover, 0.8)
-                guiSetAlpha(toppanel, 0.8)
-            elseif findPosition >= 56 and findPosition < 63 then
-                guiSetAlpha(topmover, 0.9)
-                guiSetAlpha(toppanel, 0.9)]]
             elseif findPosition > 0 then
                 guiSetAlpha(topmover, 1)
                 guiSetAlpha(toppanel, 1)
@@ -303,6 +287,8 @@ addEventHandler("onClientResourceStart", root,
             guiSetPosition(topmover, getElementX, findPosition, false) --Set new positions to mover
             guiSetSize(toppanel, getPanelX, findPosition-newYPos, false) --Set new size to notbar
         end)
+    
+        setEnabledNotificationPanel(false)
         
     end)
     

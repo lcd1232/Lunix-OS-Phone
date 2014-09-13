@@ -13,6 +13,8 @@
     <file src="images/wifi.png"/>
     <file src="images/thr.png"/>
     <file src="images/scroll.png"/>
+    <file src="images/switch.png"/>
+    <file src="images/switcher.png"/>
     <file src="images/1.png"/>
     <file src="images/2.png"/>
     <file src="images/3.png"/>
@@ -70,5 +72,9 @@
     <export function="showLockScreen" type="client"/>
     <export function="closeLockScreen" type="client"/>
     <export function="addLockScreenElement" type="client"/>
+    <export function="createSettingsPanel" type="client"/>
+    <export function="openSettingsElement" type="client"/>
+    <export function="closeSettingsElement" type="client"/>
+    <export function="addSettingsPanelElement" type="client"/>
         
 </meta>
