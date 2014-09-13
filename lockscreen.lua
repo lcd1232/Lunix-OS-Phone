@@ -103,11 +103,11 @@ addEventHandler("onClientResourceStart", root, function(res)
         guiSetPosition(lockscreen, findPosition, notY, false)
     end)
 end)
---[[addEventHandler("onClientRender", root, function()
+addEventHandler("onClientRender", root, function()
     if not guiGetVisible(lockscreen) then return false end
     guiSetText(timelockscreen, string.format("%.2i:%.2i", getRealTime().hour, getRealTime().minute))
     guiSetText(datelockscreen, string.format("%s %i, %i", month[getRealTime().month+1], getRealTime().monthday, getRealTime().year+1900))
-    end)]]
+end)
 
 local moveTimer = false
 local getOpeningMod = {}

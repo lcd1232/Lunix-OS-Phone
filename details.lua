@@ -12,6 +12,7 @@ function closeTopbar()
     
     guiBringToFront(topmover)
     guiBringToFront(toppanel)
+    guiMoveToBack(screensider)
     
     local _, posY = guiGetPosition(topmover, false) --Find positions
     posY = posY + 42 --Remove 21pix for move zone
@@ -64,6 +65,7 @@ function openTopbar()
     
     guiBringToFront(topmover)
     guiBringToFront(toppanel)
+    guiMoveToBack(screensider)
     
     local posX, posY = guiGetPosition(topmover, false) --Find positions
     posY = posY + 42 --Remove 21pix for move zone
@@ -125,8 +127,13 @@ addEventHandler("onClientResourceStart", root,
         startbutton = guiCreateStaticImage(244, 3, 35, 5, "images/element.png", false, phone)
         guiSetAlpha(startbutton, 0)
         
-        desktop = guiCreateStaticImage(screenpx, screenpy, phonew, phoneh, "images/3.png", false, phone)
+        screensider = guiCreateStaticImage(screenpx, screenpy, phonew, phoneh, "images/3.png", false, phone)
+        
+        desktop = guiCreateStaticImage(screenpx, screenpy, phonew, phoneh, "images/element.png", false, phone)
+        guiSetProperty(desktop, "ImageColours", "tl:00000000 tr:00000000 bl:00000000 br:00000000")
         --guiSetProperty(desktop, "ImageColours", "tl:AAFF0000 tr:AA00FF00 bl:AA6600FF br:AA0000FF")
+        
+        guiMoveToBack(screensider)
         
         --[[lunixphone = guiCreateLabel(0, 200, phonew, 100, "Lunix OS Phone", false, desktop)
         guiLabelSetHorizontalAlign(lunixphone, "center")
@@ -293,6 +300,7 @@ addEventHandler("onClientResourceStart", root,
     end)
     
 addEventHandler("onClientRender", root, function()
+    
     if not guiGetVisible(phone) then return false end
     guiSetText(timetopbar, string.format("%i:%.2i", getRealTime().hour, getRealTime().minute))
     guiSetText(timenotbar, string.format("%.2i:%.2i", getRealTime().hour, getRealTime().minute))
@@ -315,10 +323,12 @@ function startPhone()
     if isTimer(startExitTimer) then return false end
     
     guiSetVisible(desktop, true)
+    guiSetVisible(screensider, true) 
     showLockScreen()
     
     startExitTimer = setTimer(function()
         guiSetAlpha(desktop, guiGetAlpha(desktop)+0.1)
+        guiSetAlpha(screensider, guiGetAlpha(screensider)+0.1)
     end, 50, 10)
 end
 function stopPhone()
@@ -329,7 +339,8 @@ function stopPhone()
     startExitTimer = setTimer(function()
         id = id+1
         guiSetAlpha(desktop, guiGetAlpha(desktop)-0.1)
-        if id >= 11 then guiSetVisible(desktop, false) end
+        guiSetAlpha(screensider, guiGetAlpha(screensider)-0.1)
+        if id >= 11 then guiSetVisible(desktop, false) guiSetVisible(screensider, false) end
     end, 50, 11)
 end
 function ocPhone()
@@ -406,6 +417,10 @@ end
 function getNotificationMenuSize()
     local _, h = guiGetSize(changernots, false)
     return h
+end
+
+function changeDesktopImage(image)
+    guiStaticImageLoadImage(screensider, image)
 end
 
 local colorChanger

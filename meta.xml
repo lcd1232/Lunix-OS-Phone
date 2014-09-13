@@ -76,5 +76,6 @@
     <export function="openSettingsElement" type="client"/>
     <export function="closeSettingsElement" type="client"/>
     <export function="addSettingsPanelElement" type="client"/>
+    <export function="changeDesktopImage" type="client"/>
         
 </meta>
